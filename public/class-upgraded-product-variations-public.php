@@ -52,6 +52,8 @@ class Upgraded_Product_Variations_Public {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+		add_action( 'woocommerce_after_single_product', array($this, 'get_product_variation_data'));
+
 	}
 
 	/**
@@ -99,5 +101,33 @@ class Upgraded_Product_Variations_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/upgraded-product-variations-public.js', array( 'jquery' ), $this->version, false );
 
 	}
+
+	/**
+	 * Listen for a single product being loaded
+	 *
+	 * @since    1.0.0
+	 */
+	
+	public function get_product_variation_data() {
+		$_pf = new WC_Product_Factory();  
+		$_product = $_pf->get_product(get_the_ID());
+		$_productAttrs = $_product->get_attributes();
+		$_productVariationAttrs = $_product->get_variation_attributes();
+		$_productVariations = $_product->get_available_variations();
+		$_productAttrsObj = array();
+		foreach ($_productAttrs as $attr) {
+			$_attr = $attr->get_data();
+			$_productAttrsObj[$_attr['name']] = $_attr['options'];
+		}
+		echo "<pre>";
+		print_r($_productVariations);
+		echo "</pre>";
+		$attributesJSON = json_encode($_productVariationAttrs);
+		echo "<script>";
+		echo "var json = $attributesJSON;";
+		echo "console.log(json)";
+		echo "</script>";
+	}
+
 
 }
